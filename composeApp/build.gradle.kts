@@ -41,6 +41,8 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+
+            api("io.github.kevinnzou:compose-webview-multiplatform:1.9.20")
         }
     }
 }

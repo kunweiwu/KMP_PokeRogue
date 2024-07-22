@@ -1,35 +1,51 @@
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Button
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
+import com.multiplatform.webview.web.LoadingState
+import com.multiplatform.webview.web.WebView
+import com.multiplatform.webview.web.rememberWebViewNavigator
+import com.multiplatform.webview.web.rememberWebViewState
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-import pokerogue.composeapp.generated.resources.Res
-import pokerogue.composeapp.generated.resources.compose_multiplatform
 
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
-                }
-            }
+        Surface {
+            MainScreen()
         }
+    }
+}
+
+@Composable
+fun MainScreen() {
+    val state = rememberWebViewState(url = "https://pokerogue.net")
+    val navigator = rememberWebViewNavigator()
+    // If `screenOrientationManager` changes, dispose and reset the effect
+    DisposableEffect(Unit) {
+        state.webSettings.androidWebSettings.domStorageEnabled = true
+        // When the effect leaves the Composition
+        onDispose { }
+    }
+    Column {
+        val loadingState = state.loadingState
+        if (loadingState is LoadingState.Loading) {
+            LinearProgressIndicator(
+                progress = loadingState.progress,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        WebView(
+            state = state,
+            modifier = Modifier.fillMaxSize(),
+            navigator = navigator,
+        )
     }
 }
